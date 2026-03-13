@@ -3,11 +3,11 @@ on:
   workflow_dispatch:
     inputs:
       video_url:
-        description: 'لینکی فیلمەکە'
         required: true
       mode:
-        description: 'جۆری ئیشەکە'
         required: true
+      audio_url:
+        required: false
 
 jobs:
   build:
@@ -22,9 +22,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg
-          pip install pyrogram tgcrypto
+          pip install pyrogram tgcrypto yt-dlp requests
       - name: Run Uploader
         env:
           VIDEO_URL: ${{ github.event.inputs.video_url }}
           MODE: ${{ github.event.inputs.mode }}
+          AUDIO_URL: ${{ github.event.inputs.audio_url }}
         run: python upload.py
