@@ -9,24 +9,35 @@ VIDEO_URL = os.environ.get("VIDEO_URL")
 CHAT_ID = -1003503643297
 
 async def main():
+    if not VIDEO_URL:
+        print("❌ هیچ لینکێک نییە!")
+        return
+
     async with Client("sebar_worker", API_ID, API_HASH, bot_token=BOT_TOKEN) as app:
         print("📥 دەستکرا بە داگرتنی ڤیدیۆکە...")
+        # داگرتن بەناوی جێگیر
         os.system(f'wget -q -O "video.mp4" "{VIDEO_URL}"')
         
-        # --- بەشی جیاکردنەوەی دەنگ ---
-        print("🎵 خەریکی جیاکردنەوەی دەنگم (MP3)...")
-        # بەکارهێنانی ffmpeg بۆ دەرهێنانی دەنگ بە کوالێتی بەرز
-        os.system('ffmpeg - i video.mp4 -vn -acodec libmp3lame -q:a 2 audio.mp3')
+        # --- بەشی جیاکردنەوەی دەنگ (چاککراو) ---
+        print("🎵 خەریکی جیاکردنەوەی دەنگم...")
+        # بەکارهێنانی فەرمانی سادەتر بۆ ئەوەی تووشی هەڵەی pipe نەبێت
+        os.system('ffmpeg -i video.mp4 -q:a 0 -map a audio.mp3 -y')
         
+        if os.path.exists("audio.mp3"):
+            print("✅ دەنگەکە بە سەرکەوتوویی جیاکرایەوە.")
+        else:
+            print("❌ کێشەیەک لە جیاکردنەوەی دەنگدا هەبوو.")
+
         # ١. ناردنی ڤیدیۆکە
         print("📤 ناردنی ڤیدیۆ...")
         await app.send_document(chat_id=CHAT_ID, document="video.mp4", caption="🎬 فیلمی تەواو")
         
-        # ٢. ناردنی دەنگەکە
-        print("📤 ناردنی دەنگی فیلمەکە...")
-        await app.send_audio(chat_id=CHAT_ID, audio="audio.mp3", caption="🎵 دەنگی فیلمەکە (بۆ وەرگێڕان یان گوێگرتن)")
+        # ٢. ناردنی دەنگەکە ئەگەر دروست بووبوو
+        if os.path.exists("audio.mp3"):
+            print("📤 ناردنی دەنگی فیلمەکە...")
+            await app.send_audio(chat_id=CHAT_ID, audio="audio.mp3", caption="🎵 دەنگی جیاکراوەی فیلمەکە")
         
-        print("✨ هەموو کارەکان بە سەرکەوتوویی تەواو بوون!")
+        print("✨ هەموو کارەکان تەواو بوون!")
 
 if __name__ == "__main__":
     asyncio.run(main())
