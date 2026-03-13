@@ -1,5 +1,6 @@
 import os
 import asyncio
+import subprocess
 from pyrogram import Client
 
 API_ID = 22697853
@@ -14,30 +15,38 @@ async def main():
         return
 
     async with Client("sebar_worker", API_ID, API_HASH, bot_token=BOT_TOKEN) as app:
-        print("📥 دەستکرا بە داگرتنی ڤیدیۆکە...")
-        # داگرتن بەناوی جێگیر
-        os.system(f'wget -q -O "video.mp4" "{VIDEO_URL}"')
+        print("📥 خەریکی داگرتنی ڤیدیۆکەم...")
         
-        # --- بەشی جیاکردنەوەی دەنگ (چاککراو) ---
-        print("🎵 خەریکی جیاکردنەوەی دەنگم...")
-        # بەکارهێنانی فەرمانی سادەتر بۆ ئەوەی تووشی هەڵەی pipe نەبێت
-        os.system('ffmpeg -i video.mp4 -q:a 0 -map a audio.mp3 -y')
+        # بەکارهێنانی curl لەبری wget چونکە لە گیتھەب جێگیرترە
+        download = subprocess.run(['curl', '-L', '-o', 'video.mp4', VIDEO_URL])
         
-        if os.path.exists("audio.mp3"):
-            print("✅ دەنگەکە بە سەرکەوتوویی جیاکرایەوە.")
-        else:
-            print("❌ کێشەیەک لە جیاکردنەوەی دەنگدا هەبوو.")
+        if download.returncode != 0 or not os.path.exists("video.mp4") or os.path.getsize("video.mp4") == 0:
+            print("❌ داگرتنی ڤیدیۆکە سەرکەوتوو نەبوو یان فایلەکە بەتاڵە!")
+            return
 
-        # ١. ناردنی ڤیدیۆکە
+        # --- جیاکردنەوەی دەنگ ---
+        print("🎵 خەریکی جیاکردنەوەی دەنگم...")
+        # فەرمانی FFmpeg بە شێوەی لیست بۆ ئەوەی هیچ کێشەی نێوان (Space) دروست نەبێت
+        subprocess.run(['ffmpeg', '-i', 'video.mp4', '-q:a', '0', '-map', 'a', 'audio.mp3', '-y'])
+        
+        # ناردنی ڤیدیۆ
         print("📤 ناردنی ڤیدیۆ...")
-        await app.send_document(chat_id=CHAT_ID, document="video.mp4", caption="🎬 فیلمی تەواو")
+        await app.send_document(
+            chat_id=CHAT_ID, 
+            document="video.mp4", 
+            caption="🎬 فیلمی تەواو (SEBAR TV)"
+        )
         
-        # ٢. ناردنی دەنگەکە ئەگەر دروست بووبوو
-        if os.path.exists("audio.mp3"):
-            print("📤 ناردنی دەنگی فیلمەکە...")
-            await app.send_audio(chat_id=CHAT_ID, audio="audio.mp3", caption="🎵 دەنگی جیاکراوەی فیلمەکە")
+        # ناردنی دەنگ ئەگەر دروست ببوو و بەتاڵ نەبوو
+        if os.path.exists("audio.mp3") and os.path.getsize("audio.mp3") > 0:
+            print("📤 ناردنی دەنگەکە...")
+            await app.send_audio(
+                chat_id=CHAT_ID, 
+                audio="audio.mp3", 
+                caption="🎵 دەنگی جیاکراوەی فیلمەکە"
+            )
         
-        print("✨ هەموو کارەکان تەواو بوون!")
+        print("✨ هەموو کارەکان بە سەرکەوتوویی تەواو بوون!")
 
 if __name__ == "__main__":
     asyncio.run(main())
