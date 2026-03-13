@@ -7,6 +7,7 @@ from pyrogram import Client
 api_id = 22697853
 api_hash = "4801319a0aeb52817bc01d3cc60bb245"
 bot_token = "8626090651:AAGHXnPCYKcpxYMgZhzWNHFla_3HszBBnGY"
+# لێرە ئایدییەکەمان کردووە بە دەق بۆ ئەوەی ئیرۆرەکە نەمێنێت
 chat_id = -1002347573041
 
 video_url = os.environ.get("VIDEO_URL")
@@ -32,25 +33,26 @@ def run():
                 "-metadata:s:a:0", "title=Kurdish", "-metadata:s:a:1", "title=Original",
                 "output.mkv"
             ])
-            app.send_document(chat_id, "output.mkv", caption="🎬 فیلمی دۆبلاژ و ئۆرجیناڵ ئامادەیە")
+            # بەکارهێنانی int(chat_id) یان ڕاستەوخۆ chat_id وەک ژمارە
+            app.send_document(int(chat_id), "output.mkv", caption="🎬 فیلمی دۆبلاژ و ئۆرجیناڵ ئامادەیە")
 
         # ٢. بچووککردنەوە بۆ 70MB
         elif mode == "small_70":
             subprocess.run(["ffmpeg", "-i", "video.mp4", "-vcodec", "libx264", "-crf", "33", "-s", "854x480", "small.mp4"])
-            app.send_video(chat_id, "small.mp4", caption="📦 قەبارەی بچووک (70MB)")
+            app.send_video(int(chat_id), "small.mp4", caption="📦 قەبارەی بچووک (70MB)")
 
         # ٣. بچووککردنەوە بۆ 150MB
         elif mode == "small_150":
             subprocess.run(["ffmpeg", "-i", "video.mp4", "-vcodec", "libx264", "-crf", "28", "-s", "1280x720", "small.mp4"])
-            app.send_video(chat_id, "small.mp4", caption="📦 قەبارەی مامناوەند (150MB)")
+            app.send_video(int(chat_id), "small.mp4", caption="📦 قەبارەی مامناوەند (150MB)")
 
         # ٤. تەنها دەنگ
         elif mode == "1":
             subprocess.run(["ffmpeg", "-i", "video.mp4", "-vn", "-acodec", "libmp3lame", "audio.mp3"])
-            app.send_audio(chat_id, "audio.mp3")
+            app.send_audio(int(chat_id), "audio.mp3")
 
         # ٥. ڤیدیۆی ئاسایی (دەنگ و ڕەنگ)
         else:
-            app.send_video(chat_id, "video.mp4", caption="🎬 سێبار تیڤی - فەرموو فیلمەکە")
+            app.send_video(int(chat_id), "video.mp4", caption="🎬 سێبار تیڤی - فەرموو فیلمەکە")
 
 run()
