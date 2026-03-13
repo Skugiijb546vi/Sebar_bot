@@ -1,56 +1,39 @@
-import os
-import asyncio
-import subprocess
+import os, asyncio, subprocess
 from pyrogram import Client
 
 API_ID = 22697853
 API_HASH = "4801319a0aeb52817bc01d3cc60bb245"
 BOT_TOKEN = "8436877565:AAEG6We8wKSh1RXG85uI_VA5w-6Sswu7YLo"
 VIDEO_URL = os.environ.get("VIDEO_URL")
-
-# لێرەدا یوزەرنەیمی چەناڵەکە بەکاردەهێنین بۆ ئەوەی کێشەی ID نەمێنێت
-CHAT_ID = "@ajsjajaauai" 
+MODE = os.environ.get("MODE")
+CHAT_ID = "@ajsjajaauai"
 
 async def main():
-    if not VIDEO_URL:
-        print("❌ هیچ لینکێک نییە!")
-        return
-
     async with Client("sebar_worker", API_ID, API_HASH, bot_token=BOT_TOKEN) as app:
-        print(f"🔗 هەوڵدان بۆ بەستنەوە بە چەناڵی: {CHAT_ID}")
+        print(f"📥 دەستکرا بە داگرتن... مۆد: {MODE}")
+        # داگرتنی فایلی سەرەکی
+        subprocess.run(['curl', '-L', '-o', 'input_file', VIDEO_URL])
         
-        # ١. داگرتنی ڤیدیۆ
-        print("📥 خەریکی داگرتنی ڤیدیۆکەم...")
-        subprocess.run(['curl', '-L', '-o', 'video.mp4', VIDEO_URL])
-        
-        if not os.path.exists("video.mp4") or os.path.getsize("video.mp4") == 0:
-            print("❌ داگرتن شکستی هێنا!")
-            return
+        # ١. تەنها دەنگ
+        if MODE == "1":
+            subprocess.run(['ffmpeg', '-i', 'input_file', '-q:a', '0', '-map', 'a', 'audio.mp3', '-y'])
+            await app.send_audio(CHAT_ID, audio="audio.mp3", caption="🎵 تەنها دەنگی فیلمەکە")
 
-        # ٢. جیاکردنەوەی دەنگ
-        print("🎵 خەریکی جیاکردنەوەی دەنگم...")
-        subprocess.run(['ffmpeg', '-i', 'video.mp4', '-q:a', '0', '-map', 'a', 'audio.mp3', '-y'])
-        
-        # ٣. ناردنی ڤیدیۆکە
-        print("📤 ناردنی ڤیدیۆ بۆ تێلیگرام...")
-        try:
-            await app.send_document(
-                chat_id=CHAT_ID, 
-                document="video.mp4", 
-                caption="🎬 SEBAR TV - فیلمی تەواو"
-            )
-            
-            # ٤. ناردنی دەنگەکە
-            if os.path.exists("audio.mp3"):
-                print("📤 ناردنی دەنگەکە...")
-                await app.send_audio(
-                    chat_id=CHAT_ID, 
-                    audio="audio.mp3", 
-                    caption="🎵 دەنگی جیاکراوەی فیلمەکە"
-                )
-            print("✨ هەموو کارەکان بە سەرکەوتوویی تەواو بوون!")
-        except Exception as e:
-            print(f"❌ کێشەیەک لە ناردندا هەبوو: {e}")
+        # ٢. دەنگ و ڕەنگ (ڤیدیۆکە و دەنگەکە پێکەوە وەک دوو فایلی جیاواز)
+        elif MODE == "2":
+            subprocess.run(['ffmpeg', '-i', 'input_file', '-q:a', '0', '-map', 'a', 'audio.mp3', '-y'])
+            await app.send_document(CHAT_ID, document="input_file", caption="🎬 فیلمی تەواو")
+            await app.send_audio(CHAT_ID, audio="audio.mp3", caption="🎵 دەنگی فیلمەکە")
 
-if __name__ == "__main__":
-    asyncio.run(main())
+        # ٣. تەنها ڤیدیۆ
+        elif MODE == "3":
+            await app.send_document(CHAT_ID, document="input_file", caption="🎬 تەنها ڤیدیۆی فیلمەکە")
+
+        # ٤. بچووککردنەوەی فیلمەکە بۆ 70MB
+        elif MODE == "4":
+            print("📉 خەریکی بچووککردنەوەم...")
+            # لێرەدا بیتڕەیتەکە ڕێکدەخەین بۆ ئەوەی قەبارەکە نزیک بێتەوە لە ٧٠ مێگابایت
+            subprocess.run(['ffmpeg', '-i', 'input_file', '-vcodec', 'libx264', '-crf', '30', '-preset', 'ultrafast', '-vf', 'scale=-2:480', 'compressed.mp4', '-y'])
+            await app.send_video(CHAT_ID, video="compressed.mp4", caption="📉 فیلمی بچووککراوە (70MB)")
+
+asyncio.run(main())
