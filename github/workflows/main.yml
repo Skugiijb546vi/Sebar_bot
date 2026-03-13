@@ -1,0 +1,23 @@
+name: SEBAR Super Uploader
+on:
+  workflow_dispatch:
+    inputs:
+      video_url:
+        description: 'لینکی دایرێکتی فیلمەکە لێرە دابنێ'
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: pip install pyrogram tgcrypto
+      - name: Run Uploader
+        env:
+          VIDEO_URL: ${{ github.event.inputs.video_url }}
+        run: python upload.py
