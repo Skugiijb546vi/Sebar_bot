@@ -24,25 +24,24 @@ def run():
     with app:
         print(f"📥 دەستکردن بە کار بۆ مۆدی: {mode}")
         
-        # ١. مۆدی تەنها ڤیدیۆ (زۆر زیرەککراو بۆ شکاندنی بلۆک)
+        # ١. مۆدی تەنها ڤیدیۆ (بە بەکارهێنانی سەرچاوەی ماڵپەڕ بۆ شکاندنی بلۆک و ڕاکێشانی بەرزترین کوالێتی)
         if mode == "only_video":
-            print("🎥 خەریکی تێپەڕاندنی بلۆکی سێرڤەر و داگرتنی ڤیدیۆکەم...")
+            print("🎥 خەریکی تێپەڕاندنی بلۆکی سێرڤەر و داگرتنی بەرزترین کوالێتیم...")
             subprocess.run([
                 "yt-dlp",
                 "--user-agent", USER_AGENT,
-                "--add-header", "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+                "--add-header", "Referer: https://www.hdfilmcehennemi.nl/",
+                "--add-header", "Origin: https://www.hdfilmcehennemi.nl",
+                "--add-header", "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                 "--add-header", "Accept-Language: en-US,en;q=0.5",
-                "--add-header", "Sec-Fetch-Dest: document",
-                "--add-header", "Sec-Fetch-Mode: navigate",
-                "--add-header", "Sec-Fetch-Site: none",
-                "--hls-prefer-native", # فەرمان بە پڕۆگرامەکە دەکات کە خۆی پارچەکان کۆبکاتەوە
-                "-f", "best",
+                "--hls-prefer-native", 
+                "-f", "bestvideo+bestaudio/best",
                 "-o", "raw_video.mp4",
                 video_url
             ])
             
             if os.path.exists("raw_video.mp4"):
-                app.send_video(chat_id=chat_id, video="raw_video.mp4", caption="🎬 توانیمان سێرڤەرەکە ببەزێنین و ڤیدیۆکە دابگرین!")
+                app.send_video(chat_id=chat_id, video="raw_video.mp4", caption="🎬 ڤیدیۆکە بە بەرزترین کوالێتی داگیرا!")
             else:
                 print("❌ سێرڤەرەکە هێشتا ڕێگری دەکات.")
             return
