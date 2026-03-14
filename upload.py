@@ -8,7 +8,8 @@ api_id = 22697853
 api_hash = "4801319a0aeb52817bc01d3cc60bb245"
 bot_token = "8626090651:AAGHXnPCYKcpxYMgZhzWNHFla_3HszBBnGY"
 # لێرە ئایدییەکەمان کردووە بە دەق بۆ ئەوەی ئیرۆرەکە نەمێنێت
-chat_id = -1002347573041
+chat_id = "@ajsjajaauai"
+3041
 
 video_url = os.environ.get("VIDEO_URL")
 audio_url = os.environ.get("AUDIO_URL")
