@@ -6,7 +6,7 @@ from threading import Thread
 from telebot import apihelper
 
 # زانیارییەکانت
-BOT_TOKEN = "8626090651:AAGHXnPCYKcpxYMgZhzWNHFla_3HszBBnGY"
+BOT_TOKEN = "8626090651:AAFQAfMXvzMfWRfQ3qp2pw7Lix6EHusjJ8g"
 GITHUB_TOKEN = "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"
 REPO = "Skugiijb546vi/Sebar_bot"
 
