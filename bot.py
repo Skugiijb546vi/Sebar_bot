@@ -10,13 +10,13 @@ BOT_TOKEN = "8626090651:AAFQAfMXvzMfWRfQ3qp2pw7Lix6EHusjJ8g"
 GITHUB_TOKEN = "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"
 REPO = "Skugiijb546vi/Sebar_bot"
 
-# سڕینەوەی پرۆکسی (لە ڕێندەر پێویستت پێی نییە و کێشەت بۆ دروست دەکات)
+# سڕینەوەی پرۆکسی 
 # apihelper.proxy = {'https': 'http://proxy.server:3128'}
 
 bot = telebot.TeleBot(BOT_TOKEN)
 user_data = {}
 
-# --- سێرڤەری ساختە بۆ ئەوەی ڕێندەر بۆتەکە نەکوژێتەوە ---
+# --- سێرڤەری ساختە بۆ ئەوەی بۆتەکە نەکوژێتەوە ---
 app = Flask(__name__)
 @app.route('/')
 def home():
@@ -72,8 +72,17 @@ def action(call):
     bot.edit_message_text(f"🚀 فەرمانی ({call.data}) نێردرا بۆ گیتھەب!", call.message.chat.id, call.message.message_id)
 
 if __name__ == "__main__":
-    # کارپێکردنی سێرڤەرەکە بۆ ڕێندەر
+    # ١. پچڕاندنی هەر پەیوەندییەکی کۆن بە سێرڤەری ترەوە (چارەسەری وەڵامنەدانەوە)
+    try:
+        bot.remove_webhook()
+        print("✅ پەیوەندییە کۆنەکان پچڕان.")
+    except Exception as e:
+        print("کێشە لە پچڕاندن:", e)
+
+    # ٢. کارپێکردنی سێرڤەرەکە 
     t = Thread(target=run_web)
     t.start()
-    # کارپێکردنی بۆتەکە خۆی
-    bot.infinity_polling()
+    
+    # ٣. کارپێکردنی بۆتەکە خۆی
+    print("🚀 بۆتەکە بە فەرمی دەستی بە کار کرد!")
+    bot.infinity_polling(timeout=10, long_polling_timeout=5)
