@@ -6,7 +6,7 @@ from pyrogram import Client
 # زانیارییەکان
 api_id = 22697853
 api_hash = "4801319a0aeb52817bc01d3cc60bb245"
-bot_token = "8626090651:AAGHXnPCYKcpxYMgZhzWNHFla_3HszBBnGY"
+bot_token = "8626090651:AAFQAfMXvzMfWRfQ3qp2pw7Lix6EHusjJ8g"
 
 # ویزەرنەیمی چەناڵ
 chat_id = "@ajsjajaauai"
