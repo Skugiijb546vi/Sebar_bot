@@ -17,34 +17,42 @@ mode = os.environ.get("MODE")
 
 app = Client("sebar_uploader", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
-# ناسنامەی وێبگەڕ (بۆ ئەوەی سێرڤەرەکە وا بزانێت گۆگڵ کرۆمە و بلۆکی نەکات)
+# ناسنامەی وێبگەڕ (بۆ ئەوەی سێرڤەرەکە وا بزانێت مرۆڤە و بلۆکی نەکات)
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 
 def run():
     with app:
         print(f"📥 دەستکردن بە کار بۆ مۆدی: {mode}")
         
-        # ١. مۆدی تەنها ڤیدیۆ (بۆ لینکی m3u8 و master.txt)
+        # ١. مۆدی تەنها ڤیدیۆ (زۆر زیرەککراو بۆ شکاندنی بلۆک)
         if mode == "only_video":
-            print("🎥 خەریکی داگرتنی ڤیدیۆکەم بە ناسنامەی وێبگەڕ...")
+            print("🎥 خەریکی تێپەڕاندنی بلۆکی سێرڤەر و داگرتنی ڤیدیۆکەم...")
             subprocess.run([
-                "ffmpeg", 
-                "-user_agent", USER_AGENT,  # فێڵکردن لە سێرڤەر
-                "-i", video_url, 
-                "-c", "copy", "-bsf:a", "aac_adtstoasc", "raw_video.mp4"
+                "yt-dlp",
+                "--user-agent", USER_AGENT,
+                "--add-header", "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+                "--add-header", "Accept-Language: en-US,en;q=0.5",
+                "--add-header", "Sec-Fetch-Dest: document",
+                "--add-header", "Sec-Fetch-Mode: navigate",
+                "--add-header", "Sec-Fetch-Site: none",
+                "--hls-prefer-native", # فەرمان بە پڕۆگرامەکە دەکات کە خۆی پارچەکان کۆبکاتەوە
+                "-f", "best",
+                "-o", "raw_video.mp4",
+                video_url
             ])
+            
             if os.path.exists("raw_video.mp4"):
-                app.send_video(chat_id=chat_id, video="raw_video.mp4", caption="🎬 تەنها ڤیدیۆکە ئامادەیە")
+                app.send_video(chat_id=chat_id, video="raw_video.mp4", caption="🎬 توانیمان سێرڤەرەکە ببەزێنین و ڤیدیۆکە دابگرین!")
             else:
-                print("❌ کێشە هەبوو، ڤیدیۆکە دروست نەبوو.")
+                print("❌ سێرڤەرەکە هێشتا ڕێگری دەکات.")
             return
 
         # --- مۆدەکانی تر ---
         
-        # داگرتنی ڤیدیۆکە بە yt-dlp لەگەڵ ناسنامەی وێبگەڕ
+        # داگرتنی ڤیدیۆکە بە پڕۆگرامی ئاسایی بۆ مۆدەکانی تر
         subprocess.run([
             "yt-dlp", 
-            "--user-agent", USER_AGENT,  # فێڵکردن لە سێرڤەر
+            "--user-agent", USER_AGENT,
             "-f", "bestvideo+bestaudio/best", 
             "-o", "video.mp4", 
             video_url
