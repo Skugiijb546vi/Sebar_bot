@@ -1,0 +1,6 @@
+pyTelegramBotAPI
+requests
+flask
+pyrogram
+tgcrypto
+yt-dlp
