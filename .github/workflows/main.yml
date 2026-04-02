@@ -1,5 +1,4 @@
 name: SEBAR Super Uploader
-
 on:
   workflow_dispatch:
     inputs:
@@ -10,7 +9,7 @@ on:
         description: 'جۆری ئیشەکە'
         required: true
       audio_url:
-        description: 'لینکی دەنگی دۆبلاژ (ئارەزوومەندانە)'
+        description: 'لینکی دەنگی دۆبلاژ'
         required: false
         default: ''
 
@@ -18,22 +17,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: 🛰️ Checkout Repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
       
-      - name: 🐍 Set up Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
           
-      - name: 🛠️ Install Tools & Dependencies
+      - name: Install Tools
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y ffmpeg -qq
-          # لێرەدا curl_cffi زیاد کراوە بۆ ئەوەی ڕێگری لە بلۆککردنی سێرڤەر بکات
-          pip install -q pyrogram tgcrypto yt-dlp requests curl_cffi
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          pip install pyrogram tgcrypto yt-dlp requests
           
-      - name: 🚀 Run Sebar Uploader
+      - name: Run Uploader
         env:
           VIDEO_URL: ${{ github.event.inputs.video_url }}
           MODE: ${{ github.event.inputs.mode }}
