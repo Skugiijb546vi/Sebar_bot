@@ -15,65 +15,42 @@ mode = os.environ.get("MODE")
 
 app = Client("sebar_uploader", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
-def get_size_mb(file_path):
-    if os.path.exists(file_path):
-        return os.path.getsize(file_path) / (1024 * 1024)
-    return 0
-
-def check_and_compress(file_path):
-    size = get_size_mb(file_path)
-    if size > 1990:
-        print(f"⚠️ فایلەکە گەورەیە ({size:.2f} MB)، خەریکی بچووککردنەوەم...")
-        compressed_file = "final_fixed.mp4"
-        subprocess.run(["ffmpeg", "-i", file_path, "-vcodec", "libx264", "-crf", "28", "-preset", "faster", "-acodec", "copy", compressed_file])
-        return compressed_file
-    return file_path
-
 def run():
     with app:
         print(f"📥 دەستکردن بە کار بۆ مۆدی: {mode}")
         
-        # --- فەرمانی داگرتن بە ڕێکخستنی Ninja Mode ---
-        # لێرەدا هەموو ئەو فێڵانەمان داناوە کە لە کۆدە سەرکەوتووەکەدا هەبوو
+        # لێرەدا فەرمانەکەمان تۆکمەتر کردووە
         download_cmd = [
             "yt-dlp",
-            "--impersonate", "chrome",
+            "--impersonate", "chrome",  # ئێستا بەهۆی curl_cffi کار دەکات
             "--referer", "https://kurdsubtitle.net/",
             "--add-header", "Origin:https://kurdsubtitle.net",
             "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-            "--no-check-certificate",
-            "-f", "best", 
+            # گۆڕینی -f best بۆ -f b بۆ نەمانی ئیرۆر و کوالێتی باش
+            "-f", "b", 
             "-o", "video.mp4",
             video_url
         ]
         
-        print("🚀 خەریکی داگرتنی ڤیدیۆکەم بە مۆدی پارێزراو...")
-        subprocess.run(download_cmd)
+        print("🚀 خەریکی داگرتنی ڤیدیۆکەم بە مۆدی پارێزراو (Chrome Stealth)...")
+        result = subprocess.run(download_cmd)
         
         if not os.path.exists("video.mp4"):
-            print("❌ شکستی هێنا! سێرڤەرەکە هێشتا ڕێگە نادات. دڵنیابە لینکەکە نوێیە.")
+            print("❌ شکستی هێنا! دڵنیابە curl_cffi دامەزراوە و لینکەکە نوێیە.")
             return
 
-        # پڕۆسەی مۆدەکان
-        if mode == "merge_dual" and audio_url:
-            print("🎧 خەریکی تێکەڵکردنی دەنگم...")
-            r = requests.get(audio_url)
-            with open("kurdish.mp3", "wb") as f: f.write(r.content)
-            subprocess.run(["ffmpeg", "-i", "video.mp4", "-i", "kurdish.mp3", "-map", "0:v", "-map", "1:a", "-map", "0:a", "-c:v", "copy", "-c:a", "aac", "output.mkv"])
-            target = check_and_compress("output.mkv")
-            app.send_document(chat_id=chat_id, document=target, caption="🎬 فیلمی دۆبلاژ ئامادەیە")
-        
-        elif mode == "small_70":
-            subprocess.run(["ffmpeg", "-i", "video.mp4", "-vcodec", "libx264", "-crf", "35", "-s", "854x480", "small.mp4"])
-            app.send_video(chat_id=chat_id, video="small.mp4", caption="📦 70MB Optimized")
-            
-        elif mode == "1": # تەنها دەنگ
+        # پڕۆسەی ناردن بۆ تێلێگرام (وەک کۆدەکەی پێشوو)
+        if mode == "1":
             subprocess.run(["ffmpeg", "-i", "video.mp4", "-vn", "-acodec", "libmp3lame", "audio.mp3"])
             app.send_audio(chat_id=chat_id, audio="audio.mp3")
-
-        else: # مۆدی ئاسایی
-            target = check_and_compress("video.mp4")
-            app.send_video(chat_id=chat_id, video=target, caption="🎬 سێبار تیڤی - فەرموو فیلمەکە")
+        else:
+            # پشکنینی قەبارە و ناردنی ڤیدیۆ
+            file_size = os.path.getsize("video.mp4") / (1024 * 1024)
+            if file_size > 1990:
+                 subprocess.run(["ffmpeg", "-i", "video.mp4", "-vcodec", "libx264", "-crf", "28", "final.mp4"])
+                 app.send_video(chat_id=chat_id, video="final.mp4", caption="🎬 سێبار تیڤی - ڤیدیۆی چڕکراوە")
+            else:
+                 app.send_video(chat_id=chat_id, video="video.mp4", caption="🎬 سێبار تیڤی - فەرموو")
 
 if __name__ == "__main__":
     run()
