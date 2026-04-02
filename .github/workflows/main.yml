@@ -1,4 +1,5 @@
 name: SEBAR Super Uploader
+
 on:
   workflow_dispatch:
     inputs:
@@ -17,20 +18,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: 🛰️ Checkout Repository
+        uses: actions/checkout@v3
       
-      - name: Set up Python
+      - name: 🐍 Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
           
-      - name: Install Tools
+      - name: 🛠️ Install Tools & Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
-          pip install pyrogram tgcrypto yt-dlp requests
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg -qq
+          # لێرەدا curl_cffi زیاد کراوە بۆ ئەوەی ڕێگری لە بلۆککردنی سێرڤەر بکات
+          pip install -q pyrogram tgcrypto yt-dlp requests curl_cffi
           
-      - name: Run Uploader
+      - name: 🚀 Run Sebar Uploader
         env:
           VIDEO_URL: ${{ github.event.inputs.video_url }}
           MODE: ${{ github.event.inputs.mode }}
